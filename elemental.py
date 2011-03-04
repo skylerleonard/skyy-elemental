@@ -59,7 +59,7 @@ class World(object):
 		self.__data[key] = value
 	def __genterrain(self, spawn=False):
 		data = b""
-		terrain = [2,2,2,2,7,4,6,5,1]
+		terrain = [2,2,2,2,7,4,6,5,5,8,8,1]
 		for i in range(1840):
 			if spawn and i == 920:
 				data += b"\x00"
@@ -153,7 +153,7 @@ def save_world(game, name=None):
 
 def showmap(game, window, alert=None):
 	window.addstr(0,0,"".join([ITEMS[item].char for item in game.world[game.pos[:2]]]))
-	window.addch(game.player.pos[0], game.player.pos[1], "X")
+	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE)
 	window.addch(game.pos[2], game.pos[3], window.inch(game.pos[2], game.pos[3]), curses.A_REVERSE)
 	if alert: window.addstr(22*(game.player.pos[0] != 22 and game.pos[2] != 22),0,alert.center(79), curses.A_REVERSE)
 	window.addstr(23,0,HELP_TEXT, curses.A_REVERSE)
