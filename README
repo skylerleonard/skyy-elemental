@@ -1,6 +1,32 @@
+########################################################################
 To run:
-	python3.1 elemental.py
+    python3.1 elemental.py
 Make sure 'items.txt' and 'crafting.txt' are in the same directory.
 
 To play:
-	#something goes here
+    Q/ESC: Quit
+    WASD: Move Player
+    Arrows: Move Target
+    G: Dig/Pick up Item
+    I: Inventory
+        B/Q: Back to map
+        LEFT/RIGHT: Switch between Inventory and Equipped Items
+        UP/DOWN: Select Item
+        Enter/Space: Equip/Unequip Item
+        D: Drop Item. WARNING: Will be lost forever!
+        C: Enter Crafting Menu:
+            Choose objects from your inventory to use to craft, then
+            press '~' to confirm. 
+        0: Send to bottom
+    Enter/Space: Place Block
+        Note: The last placeable block in your inventory will be placed.
+        Pressing '0' while in your inventory will send an item to the 
+        bottom.
+    
+    You can only dig items that you have the strength in that element.
+    For instance, Stone requires 5 earth damage. You can see your
+    current damage in the inventory in the form (Earth, Air, Fire Water)
+    
+    You can only hold so much in equipped at one time. You can see how
+    much you're holding in the inventory, under 'bearing'. Your strength
+    is by default 10. You may at some time be able to increase it.

@@ -222,6 +222,8 @@ def showinv(win, game):
 			lists[selected[0]].pop(selected[1])
 		elif move in (ord("c"), ):
 			showcrafting(win, game)
+		elif move in (ord("0"), ):
+			lists[selected[0]].append(lists[selected[0]].pop(selected[1]))
 
 def showcrafting(win, game):
 	help_text = "B: Back; Enter/Space: Add/Remove; ~: Confirm".center(79)
@@ -246,6 +248,7 @@ def showcrafting(win, game):
 		win.refresh()
 		move = win.getch()
 		if move in (ord("b"), ord("q")):
+			game.player.inv + crafting
 			return
 		elif move in (curses.KEY_LEFT, curses.KEY_RIGHT):
 			if lists[not selected[0]]:
