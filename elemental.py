@@ -18,15 +18,15 @@ CRAFTING = {}
 
 def biasedRandom(lo, hi, target, steps=1):
 	"""Return a random number between lo and hi; that is more likely to be near target. Increasing steps will increase likely hood of being close to target."""
-    if lo >= hi:
-        raise ValueError("lo should be less than hi")
-    elif target < lo or target >= hi:
-        raise ValueError("target not in range(lo, hi)")
-    else:
-        num = random.randint(lo, hi)
-        for i in range(steps):
-            num += int(random.random() * (target - num))
-        return num
+	if lo >= hi:
+		raise ValueError("lo should be less than hi")
+	elif target < lo or target >= hi:
+		raise ValueError("target not in range(lo, hi)")
+	else:
+		num = random.randint(lo, hi)
+		for i in range(steps):
+			num += int(random.random() * (target - num))
+		return num
 
 def biasedRandomChoice(lst, index, steps=1):
 	"""Return a random element from list lst, that is more likely to be near index."""
