@@ -230,6 +230,8 @@ def showinv(win, game):
 			if ITEMS[lists[selected[0]][selected[1]]].weight + (-selected[0] or 1)*game.player.bear <= game.player.strength:
 				game.player.bear += (-selected[0] or 1)*ITEMS[lists[selected[0]][selected[1]]].weight
 				lists[not selected[0]].append(lists[selected[0]].pop(selected[1]))
+			if not lists[selected[0]]: # If they exhaust the list
+				selected = (not selected[0], selected[1])
 		elif move in (ord("d"), ):
 			lists[selected[0]].pop(selected[1])
 		elif move in (ord("c"), ):
@@ -274,6 +276,8 @@ def showcrafting(win, game):
 			selected = (selected[0], selected[1] + 1)
 		elif move in (10,32): # Enter / Space
 			lists[not selected[0]].append(lists[selected[0]].pop(selected[1]))
+			if not lists[selected[0]]: # If they exhaust the list
+				selected = (not selected[0], selected[1])
 		elif move in (ord("~"), ):
 			try:
 				game.player.inv.append(CRAFTING[tuple(crafting)])
