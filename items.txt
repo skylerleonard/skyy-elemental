@@ -16,4 +16,6 @@
 
 270: Item(alignment = 1, name = "Stone Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 3),
 271: Item(alignment = 1, name = "Iron Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 5),
+
+280: Item(alignment = 4, name = "Bucket", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 1),
 }

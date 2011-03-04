@@ -17,6 +17,7 @@ CRAFTING = {}
 
 
 def biasedRandom(lo, hi, target, steps=1):
+	"""Return a random number between lo and hi; that is more likely to be near target. Increasing steps will increase likely hood of being close to target."""
     if lo >= hi:
         raise ValueError("lo should be less than hi")
     elif target < lo or target >= hi:
@@ -28,6 +29,7 @@ def biasedRandom(lo, hi, target, steps=1):
         return num
 
 def biasedRandomChoice(lst, index, steps=1):
+	"""Return a random element from list lst, that is more likely to be near index."""
 	return lst[biasedRandom(0, len(lst)-1, index, steps)]
 
 class Curses_screen:
@@ -47,6 +49,7 @@ class Curses_screen:
 		curses.endwin()
 
 class World(object):
+	"""Front end to a dictionary, functions the same, except that if Key is not found, it is created."""
 	def __init__(self):
 		self.__data = {(0,0): self.__genterrain(True)}
 	def __getitem__(self, key):
@@ -61,7 +64,7 @@ class World(object):
 		data = b""
 		terrain = [2,2,2,2,7,4,6,5,5,8,8,1]
 		for i in range(1840):
-			if spawn and i == 920:
+			if spawn and i == 920: # If we are on the spawn chunk, and at the middle.
 				data += b"\x00"
 				continue
 			terrain[0] = biasedRandomChoice(terrain, 0, steps=3)
@@ -69,6 +72,7 @@ class World(object):
 		return data
 
 class Game(object):
+	"""Master game object"""
 	def __init__(self, gamename, player, seed=None):
 		self.gamename = gamename
 		self.player = player
@@ -77,11 +81,14 @@ class Game(object):
 		self.world = World()
 	
 	def slowmove(self, dr=(0,0)):
+		"""Move target one space at a time"""
 		if self.pos[2] + dr[0] > 22 or self.pos[3] + dr[1] > 79 or self.pos[2] + dr[0] < 0 or self.pos[3] + dr[1] < 0: return
 		self.pos = (self.pos[0], self.pos[1], self.pos[2] + dr[0], self.pos[3] + dr[1])
 	def bigmove(self, dr=(0,0)):
+		"""Move to next screen"""
 		self.pos = (self.pos[0] + dr[0], self.pos[1] + dr[1], self.pos[2], self.pos[3] )
 	def dig(self):
+		"""Replace the item at target with it's .replacewith propery, if the player has enough strenght"""
 		index = 80 * self.pos[2] + self.pos[3]
 		item = self.world[self.pos[:2]][index]
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
@@ -90,6 +97,7 @@ class Game(object):
 		self.player.inv += ITEMS[item].drops
 		self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 	def placeblock(self):
+		"""Place a block at target."""
 		index = 80 * self.pos[2] + self.pos[3]
 		newitem = None
 		for i in range(len(self.player.inv)-1, -1, -1):
@@ -100,6 +108,7 @@ class Game(object):
 			self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 		
 class Player(object):
+	"""Player Class"""
 	def __init__(self, name, pos=(11,40), inv=[]):
 		self.name = name
 		self.pos = pos
@@ -152,14 +161,15 @@ def save_world(game, name=None):
 		pickle.dump(game, save_file)
 
 def showmap(game, window, alert=None):
-	window.addstr(0,0,"".join([ITEMS[item].char for item in game.world[game.pos[:2]]]))
-	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE)
-	window.addch(game.pos[2], game.pos[3], window.inch(game.pos[2], game.pos[3]), curses.A_REVERSE)
-	if alert: window.addstr(22*(game.player.pos[0] != 22 and game.pos[2] != 22),0,alert.center(79), curses.A_REVERSE)
-	window.addstr(23,0,HELP_TEXT, curses.A_REVERSE)
+	window.addstr(0,0,"".join([ITEMS[item].char for item in game.world[game.pos[:2]]])) # Print the map
+	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE) # Add the player to the map
+	window.addch(game.pos[2], game.pos[3], window.inch(game.pos[2], game.pos[3]), curses.A_REVERSE) # Add the target to the map
+	if alert: window.addstr(22*(game.player.pos[0] != 22 and game.pos[2] != 22),0,alert.center(79), curses.A_REVERSE) # Add an alert message to the bottom, or the top if either target or player is at the bottom
+	window.addstr(23,0,HELP_TEXT, curses.A_REVERSE) # Add the help text to the bottom.
 	window.refresh()
 
 def mainmenu(win, menu=["New Game", "Load Game", "Quit"], default = 0):
+	"""Function for displaying a full screen menu, menu wraps, but does not implement anything incase the menu is longer than the screen. Sorry."""
 	if not menu: return None
 	win.erase()
 	selected = default
@@ -180,12 +190,14 @@ def mainmenu(win, menu=["New Game", "Load Game", "Quit"], default = 0):
 			return selected
 
 def nicerange(center, length, mx=21):
+	"""Returns a tuple containing the start and end range of a list of length 'length' that centers on 'center' with maximum range 'mx'"""
 	if length < mx: return (0,length)
 	elif center < mx/2: return (0,mx)
 	elif center > length-(mx/2): return (length-mx, length)
 	else: return (int(center-(mx/2)), int(center+(mx/2)))
 
 def showinv(win, game):
+	"""Show inventory."""
 	help_text = "B: Back; Enter/Space: Equip/Unequip; D: Drop Item; C: Crafting".center(79)
 	selected = 0,0
 	while True:
@@ -226,6 +238,9 @@ def showinv(win, game):
 			lists[selected[0]].append(lists[selected[0]].pop(selected[1]))
 
 def showcrafting(win, game):
+	"""Show crafting menu.
+	
+	Basically the same as showinv, but has a few subtle differences."""
 	help_text = "B: Back; Enter/Space: Add/Remove; ~: Confirm".center(79)
 	selected = 0,0
 	crafting = []
@@ -273,9 +288,9 @@ def showcrafting(win, game):
 
 def main():
 	with open("items.txt") as itemfile:
-		ITEMS.update(eval(itemfile.read()))
+		ITEMS.update(eval(itemfile.read())) # Load Items
 	with open("crafting.txt") as craftingfile:
-		CRAFTING.update(eval(craftingfile.read()))
+		CRAFTING.update(eval(craftingfile.read())) # Load Crafting options
 	with Curses_screen() as win:
 		height,width = win.getmaxyx()
 		if not (height == 24 or width == 80):
@@ -318,21 +333,21 @@ def main():
 					return 0
 				elif lastwish == 1:
 					return 0
-				
+			# Player movement
 			elif command == ord("w"): game.bigmove(game.player.move(game, (-1,0)))
 			elif command == ord("s"): game.bigmove(game.player.move(game, (1,0)))
 			elif command == ord("a"): game.bigmove(game.player.move(game, (0,-1)))
 			elif command == ord("d"): game.bigmove(game.player.move(game, (0,1)))
-			
+			# Target movement
 			elif command == curses.KEY_UP: game.slowmove((-1,0))
 			elif command == curses.KEY_DOWN: game.slowmove((1,0))
 			elif command == curses.KEY_LEFT: game.slowmove((0,-1))
 			elif command == curses.KEY_RIGHT: game.slowmove((0,1))
-			
+			# Dig
 			elif command == ord("g"): game.dig()
-			
+			# Show inv
 			elif command == ord("i"): showinv(win, game)
-			
+			# Place a block
 			elif command in (10,32): game.placeblock() # Enter / Space
 			
 			alert = ITEMS[game.world[game.pos[:2]][80 * game.pos[2] + game.pos[3]]].name
