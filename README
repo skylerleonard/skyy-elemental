@@ -1,0 +1,6 @@
+To run:
+	python3.1 elemental.py
+Make sure 'items.txt' and 'crafting.txt' are in the same directory.
+
+To play:
+	#something goes here
