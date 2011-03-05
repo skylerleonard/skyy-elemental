@@ -4,8 +4,6 @@ import curses, time, pickle, sys, os, random, gzip
 
 os.chdir(os.path.dirname(sys.argv[0]) or ".")
 
-HELP_TEXT = "Q: Quit; WASD: Move Player; G: Dig/Pick up; I: Inv; O: Options".center(79)
-
 ENC = "UTF-8"
 
 """
@@ -15,6 +13,7 @@ alignments: 0 = none, 1 = earth, 2 = air, 3 = fire, 4 = water
 ITEMS = {}
 CRAFTING = {}
 
+WINDOWSIZE = {0: 24, 1: 80}
 
 def biasedRandom(lo, hi, target, steps=1):
 	"""Return a random number between lo and hi; that is more likely to be near target. Increasing steps will increase likely hood of being close to target."""
@@ -63,10 +62,7 @@ class World(object):
 	def __genterrain(self, spawn=False):
 		data = b""
 		terrain = [2,2,2,2,7,4,6,5,5,8,8,1]
-		for i in range(1840):
-			if spawn and i == 920: # If we are on the spawn chunk, and at the middle.
-				data += b"\x00"
-				continue
+		for i in range((WINDOWSIZE[0]-1)*WINDOWSIZE[1]):
 			terrain[0] = biasedRandomChoice(terrain, 0, steps=3)
 			data += bytes([terrain[0]])
 		return data
@@ -77,19 +73,19 @@ class Game(object):
 		self.gamename = gamename
 		self.player = player
 		self.seed = seed
-		self.pos = 0,0, 11,40
+		self.pos = 0,0, int((WINDOWSIZE[0]-2)/2), int(WINDOWSIZE[1]/2) # Center
 		self.world = World()
-	
+		self.windowsize = WINDOWSIZE
 	def slowmove(self, dr=(0,0)):
 		"""Move target one space at a time"""
-		if self.pos[2] + dr[0] > 22 or self.pos[3] + dr[1] > 79 or self.pos[2] + dr[0] < 0 or self.pos[3] + dr[1] < 0: return
+		if self.pos[2] + dr[0] > WINDOWSIZE[0]-2 or self.pos[3] + dr[1] > WINDOWSIZE[1]-1 or self.pos[2] + dr[0] < 0 or self.pos[3] + dr[1] < 0: return
 		self.pos = (self.pos[0], self.pos[1], self.pos[2] + dr[0], self.pos[3] + dr[1])
 	def bigmove(self, dr=(0,0)):
 		"""Move to next screen"""
 		self.pos = (self.pos[0] + dr[0], self.pos[1] + dr[1], self.pos[2], self.pos[3] )
 	def dig(self):
 		"""Replace the item at target with it's .replacewith propery, if the player has enough strenght"""
-		index = 80 * self.pos[2] + self.pos[3]
+		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
 		item = self.world[self.pos[:2]][index]
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
 			return
@@ -98,7 +94,7 @@ class Game(object):
 		self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 	def placeblock(self):
 		"""Place a block at target."""
-		index = 80 * self.pos[2] + self.pos[3]
+		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
 		newitem = None
 		for i in range(len(self.player.inv)-1, -1, -1):
 			if self.player.inv[i] < 256:
@@ -109,9 +105,9 @@ class Game(object):
 		
 class Player(object):
 	"""Player Class"""
-	def __init__(self, name, pos=(11,40), inv=[]):
+	def __init__(self, name, pos=None, inv=[]):
 		self.name = name
-		self.pos = pos
+		self.pos = pos or (int((WINDOWSIZE[0]-2)/2), int(WINDOWSIZE[1]/2))
 		self.inv = inv
 		self.equipped = []
 		self.bear = 0
@@ -119,14 +115,14 @@ class Player(object):
 		#self.damage = property(self.__damage)
 	def move(self, game, dr=(0,0)):
 		old = self.pos
-		if self.pos[0] + dr[0] > 22 or self.pos[1] + dr[1] > 79 or self.pos[0] + dr[0] < 0 or self.pos[1] + dr[1] < 0:
-			self.pos = (self.pos[0] + 22*-dr[0], self.pos[1] + 79*-dr[1])
-			if not ITEMS[game.world[game.pos[:2]][80 * game.pos[2] + game.pos[3]]].walkable:
+		if self.pos[0] + dr[0] > WINDOWSIZE[0]-2 or self.pos[1] + dr[1] > WINDOWSIZE[1]-1 or self.pos[0] + dr[0] < 0 or self.pos[1] + dr[1] < 0:
+			self.pos = (self.pos[0] + (WINDOWSIZE[0]-2)*-dr[0], self.pos[1] + (WINDOWSIZE[1]-1)*-dr[1])
+			if not ITEMS[game.world[game.pos[:2]][(WINDOWSIZE[1]) * game.pos[2] + game.pos[3]]].walkable:
 				self.pos = old
 				return (0,0)
 			return dr
 		self.pos = (self.pos[0] + dr[0], self.pos[1] + dr[1])
-		if not ITEMS[game.world[game.pos[:2]][80 * self.pos[0] + self.pos[1]]].walkable:
+		if not ITEMS[game.world[game.pos[:2]][(WINDOWSIZE[1]) * self.pos[0] + self.pos[1]]].walkable:
 			self.pos = old
 		return (0,0)
 	def damage(self):
@@ -161,11 +157,12 @@ def save_world(game, name=None):
 		pickle.dump(game, save_file)
 
 def showmap(game, window, alert=None):
+	help_text = "Q: Quit; WASD: Move Player; G: Dig/Pick up; I: Inv; O: Options".center(WINDOWSIZE[1]-1)
 	window.addstr(0,0,"".join([ITEMS[item].char for item in game.world[game.pos[:2]]])) # Print the map
 	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE) # Add the player to the map
 	window.addch(game.pos[2], game.pos[3], window.inch(game.pos[2], game.pos[3]), curses.A_REVERSE) # Add the target to the map
-	if alert: window.addstr(22*(game.player.pos[0] != 22 and game.pos[2] != 22),0,alert.center(79), curses.A_REVERSE) # Add an alert message to the bottom, or the top if either target or player is at the bottom
-	window.addstr(23,0,HELP_TEXT, curses.A_REVERSE) # Add the help text to the bottom.
+	if alert: window.addstr((WINDOWSIZE[0]-2)*(game.player.pos[0] != (WINDOWSIZE[0]-2) and game.pos[2] != (WINDOWSIZE[0]-2)),0,alert.center((WINDOWSIZE[1]-1)), curses.A_REVERSE) # Add an alert message to the bottom, or the top if either target or player is at the bottom
+	window.addstr((WINDOWSIZE[0]-1),0,help_text, curses.A_REVERSE) # Add the help text to the bottom.
 	window.refresh()
 
 def mainmenu(win, menu=["New Game", "Load Game", "Quit"], default = 0):
@@ -178,7 +175,7 @@ def mainmenu(win, menu=["New Game", "Load Game", "Quit"], default = 0):
 		selected %= len(menu)
 		for i in range(len(menu)):
 			option = menu[i]
-			win.addstr(10+i, 0, option.center(79), curses.A_REVERSE*(selected == i))
+			win.addstr(10+i, 0, option.center((WINDOWSIZE[1]-1)), curses.A_REVERSE*(selected == i))
 		win.refresh()
 		move = win.getch()
 		if move == curses.KEY_UP:
@@ -189,12 +186,15 @@ def mainmenu(win, menu=["New Game", "Load Game", "Quit"], default = 0):
 			win.erase()
 			return selected
 
-def nicerange(center, length, mx=21):
+def nicerange(center, length, mx=(WINDOWSIZE[0]-3)):
 	"""Returns a tuple containing the start and end range of a list of length 'length' that centers on 'center' with maximum range 'mx'"""
 	if length < mx: return (0,length)
 	elif center < mx/2: return (0,mx)
 	elif center > length-(mx/2): return (length-mx, length)
 	else: return (int(center-(mx/2)), int(center+(mx/2)))
+
+def lowtwo(number):
+	return int(number/2)*2
 
 def showinv(win, game):
 	"""Show inventory."""
@@ -202,19 +202,19 @@ def showinv(win, game):
 	selected = 0,0
 	while True:
 		win.erase()
-		win.addstr(0,0,"Unequipped".center(40) + "Equipped".center(40), curses.A_REVERSE)
+		win.addstr(0,0,"Unequipped".center(int(WINDOWSIZE[1]/2)) + "Equipped".center(int(WINDOWSIZE[1]/2)), curses.A_REVERSE)
 		lists = (game.player.inv, game.player.equipped)
 		selected = (selected[0], selected[1] % (len(lists[selected[0]]) or 1)) # abitrary 1, will never come into play if the len is 0, so w/e
 		rng = nicerange(selected[1], len(lists[selected[0]]))
 		for i in range(*rng):
-			option = ITEMS[lists[selected[0]][i]].name.ljust(39)
-			win.addstr(1+i-rng[0], 41*(selected[0]), option, curses.A_REVERSE*(selected[1] == i))
+			option = ITEMS[lists[selected[0]][i]].name.ljust((int(WINDOWSIZE[1]/2)-1))
+			win.addstr(1+i-rng[0], (int(WINDOWSIZE[1]/2)+1)*(selected[0]), option, curses.A_REVERSE*(selected[1] == i))
 		for i in range(*nicerange(0, len(lists[not selected[0]]))):
-			option = ITEMS[lists[not selected[0]][i]].name.ljust(39)
-			win.addstr(1+i, 41*(not selected[0]), option)
-		stats = ("Damage: %s; Bearing: %i" % (repr(game.player.damage()[1:]), game.player.bear)).center(80)
-		win.addstr(22,0,stats,curses.A_REVERSE)
-		win.addstr(23,0,help_text, curses.A_REVERSE)
+			option = ITEMS[lists[not selected[0]][i]].name.ljust((int(WINDOWSIZE[1]/2)-1))
+			win.addstr(1+i, (int(WINDOWSIZE[1]/2)+1)*(not selected[0]), option)
+		stats = ("Damage: %s; Bearing: %i" % (repr(game.player.damage()[1:]), game.player.bear)).center(WINDOWSIZE[1])
+		win.addstr((WINDOWSIZE[0]-2),0,stats,curses.A_REVERSE)
+		win.addstr((WINDOWSIZE[0]-1),0,help_text, curses.A_REVERSE)
 		win.refresh()
 		move = win.getch()
 		if move in (ord("b"), ord("q")):
@@ -246,22 +246,22 @@ def showcrafting(win, game):
 	help_text = "B: Back; Enter/Space: Add/Remove; ~: Confirm".center(79)
 	selected = 0,0
 	crafting = []
-	result = "".center(39)
+	result = "".center(int(WINDOWSIZE[1]/2)-1)
 	while True:
 		win.erase()
-		win.addstr(0,0,"Inventory".center(40) + "Crafting".center(40), curses.A_REVERSE)
+		win.addstr(0,0,"Inventory".center(int(WINDOWSIZE[1]/2)) + "Crafting".center(int(WINDOWSIZE[1]/2)), curses.A_REVERSE)
 		lists = (game.player.inv, crafting)
 		selected = (selected[0], selected[1] % (len(lists[selected[0]]) or 1)) # abitrary 1, will never come into play if the len is 0, so w/e
 		rng = nicerange(selected[1], len(lists[selected[0]]))
 		for i in range(*rng):
-			option = ITEMS[lists[selected[0]][i]].name.ljust(39)
-			win.addstr(1+i-rng[0], 41*(selected[0]), option, curses.A_REVERSE*(selected[1] == i))
+			option = ITEMS[lists[selected[0]][i]].name.ljust(int(WINDOWSIZE[1]/2)-1)
+			win.addstr(1+i-rng[0], (int(WINDOWSIZE[1]/2)+1)*(selected[0]), option, curses.A_REVERSE*(selected[1] == i))
 		for i in range(*nicerange(0,len(lists[not selected[0]]))):
 			option = ITEMS[lists[not selected[0]][i]].name.ljust(39)
-			win.addstr(1+i, 41*(not selected[0]), option)
+			win.addstr(1+i, (int(WINDOWSIZE[1]/2)+1)*(not selected[0]), option)
 		
-		win.addstr(22,40,result, curses.A_REVERSE)
-		win.addstr(23,0,help_text, curses.A_REVERSE)
+		win.addstr((WINDOWSIZE[0]-2),(int(WINDOWSIZE[1]/2)+1),result, curses.A_REVERSE)
+		win.addstr((WINDOWSIZE[0]-1),0,help_text, curses.A_REVERSE)
 		win.refresh()
 		move = win.getch()
 		if move in (ord("b"), ord("q")):
@@ -288,7 +288,7 @@ def showcrafting(win, game):
 		try:
 			result = ITEMS[CRAFTING[tuple(crafting)]].name.center(39)
 		except KeyError:
-			result = "".center(39)
+			result = "".center(int(WINDOWSIZE[1]/2)-1)
 
 def main():
 	with open("items.txt") as itemfile:
@@ -297,8 +297,9 @@ def main():
 		CRAFTING.update(eval(craftingfile.read())) # Load Crafting options
 	with Curses_screen() as win:
 		height,width = win.getmaxyx()
-		if not (height == 24 or width == 80):
-			raise ValueError("Terminal is not thr right size! Should be 80x24.")
+		if height < 12 or width < 80:
+			raise ValueError("Terminal is not the right size!")
+		WINDOWSIZE.update({0: height, 1: width})
 		while True:
 			choice = mainmenu(win)
 			if choice == 0: # New Game
@@ -323,6 +324,9 @@ def main():
 					continue
 				worldfile = saves[mainmenu(win, saves)]
 				game = load_world(worldfile)
+				if game.windowsize != WINDOWSIZE:
+					mainmenu(win, ["Savefile designed for different sized screen: %s" % repr(game.windowsize)])
+					continue
 			if choice == 2: # Quit
 				return 0
 			break
@@ -354,7 +358,7 @@ def main():
 			# Place a block
 			elif command in (10,32): game.placeblock() # Enter / Space
 			
-			alert = ITEMS[game.world[game.pos[:2]][80 * game.pos[2] + game.pos[3]]].name
+			alert = ITEMS[game.world[game.pos[:2]][WINDOWSIZE[1] * game.pos[2] + game.pos[3]]].name
 	return 0
 
 
