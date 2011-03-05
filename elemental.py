@@ -87,6 +87,7 @@ class Game(object):
 		"""Replace the item at target with it's .replacewith propery, if the player has enough strenght"""
 		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
 		item = self.world[self.pos[:2]][index]
+		if item == 1: return True # special case for pits.
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
 			return False
 		newitem = ITEMS[item].replacewith
