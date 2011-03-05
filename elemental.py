@@ -88,10 +88,11 @@ class Game(object):
 		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
 		item = self.world[self.pos[:2]][index]
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
-			return
+			return False
 		newitem = ITEMS[item].replacewith
 		self.player.inv += ITEMS[item].drops
 		self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
+		return True
 	def placeblock(self):
 		"""Place a block at target."""
 		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
@@ -100,7 +101,7 @@ class Game(object):
 			if self.player.inv[i] < 256:
 				newitem = self.player.inv.pop(i)
 				break
-		if newitem:
+		if newitem and self.dig():
 			self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 		
 class Player(object):
