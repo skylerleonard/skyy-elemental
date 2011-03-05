@@ -88,10 +88,11 @@ class Game(object):
 		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
 		item = self.world[self.pos[:2]][index]
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
-			return
+			return False
 		newitem = ITEMS[item].replacewith
 		self.player.inv += ITEMS[item].drops
 		self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
+		return True
 	def placeblock(self):
 		"""Place a block at target."""
 		index = WINDOWSIZE[1] * self.pos[2] + self.pos[3]
@@ -100,7 +101,7 @@ class Game(object):
 			if self.player.inv[i] < 256:
 				newitem = self.player.inv.pop(i)
 				break
-		if newitem:
+		if newitem and self.dig():
 			self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 		
 class Player(object):
@@ -159,7 +160,7 @@ def save_world(game, name=None):
 def showmap(game, window, alert=None):
 	help_text = "Q: Quit; WASD: Move Player; G: Dig/Pick up; I: Inv; O: Options".center(WINDOWSIZE[1]-1)
 	window.addstr(0,0,"".join([ITEMS[item].char for item in game.world[game.pos[:2]]])) # Print the map
-	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE) # Add the player to the map
+	window.addch(game.player.pos[0], game.player.pos[1], "X", curses.A_REVERSE + curses.A_BOLD) # Add the player to the map
 	window.addch(game.pos[2], game.pos[3], window.inch(game.pos[2], game.pos[3]), curses.A_REVERSE) # Add the target to the map
 	if alert: window.addstr((WINDOWSIZE[0]-2)*(game.player.pos[0] != (WINDOWSIZE[0]-2) and game.pos[2] != (WINDOWSIZE[0]-2)),0,alert.center((WINDOWSIZE[1]-1)), curses.A_REVERSE) # Add an alert message to the bottom, or the top if either target or player is at the bottom
 	window.addstr((WINDOWSIZE[0]-1),0,help_text, curses.A_REVERSE) # Add the help text to the bottom.
@@ -199,7 +200,8 @@ def lowtwo(number):
 def showinv(win, game):
 	"""Show inventory."""
 	help_text = "B: Back; Enter/Space: Equip/Unequip; D: Drop Item; C: Crafting".center(79)
-	selected = 0,0
+	selected = ((len(game.player.inv) > 0) or 2*(len(game.player.equipped) > 0) or 3 + mainmenu(win, menu=["No items in Inventory!"])) - 1 , 0
+	if selected[0] > 1: return
 	while True:
 		win.erase()
 		win.addstr(0,0,"Unequipped".center(int(WINDOWSIZE[1]/2)) + "Equipped".center(int(WINDOWSIZE[1]/2)), curses.A_REVERSE)
