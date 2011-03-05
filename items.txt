@@ -10,6 +10,7 @@
 8: Item(alignment = 1, name = "Iron Ore", char = "@", weight = 15, life = 5, replacewith = 3, drops = [4, 260], walkable = False, damage = 3),
 9: Item(alignment = 1, name = "Wood", char = "=", weight = 10, life = 1, replacewith = 3, drops = [257,257], walkable = True, damage = 1),
 10: Item(alignment = 1, name = "Stone Tile", char = "+", weight = 10, life = 7, replacewith = 3, drops = [10], walkable = True, damage = 1),
+11: Item(alignment = 1, name = "Wood Tile", char = "x", weight = 9, life = 7, replacewith = 3, drops = [11], walkable = True, damage = 1),
 
 257: Item(alignment = 1, name = "Stick", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
 
