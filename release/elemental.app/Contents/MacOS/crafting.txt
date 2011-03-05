@@ -1,0 +1,7 @@
+{
+(9, ): 257, # 1 Wood = 2 Sticks
+(5,5): 10, # 2 Stone = Stone Tile
+(4,257,257): 270, # 2 Sticks, 1 Pebble = Stone Axe
+(257,257,260): 271, # 2 Sticks, 1 Iron = Iron Axe
+(260,260): 280, # 2 Iron = Bucket
+}
