@@ -15,9 +15,11 @@
 257: Item(alignment = 1, name = "Stick", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
 
 260: Item(alignment = 1, name = "Iron", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
+261: Item(alignment = 1, name = "Water Amulet", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
 
 270: Item(alignment = 1, name = "Stone Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 3),
 271: Item(alignment = 1, name = "Iron Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 5),
 
 280: Item(alignment = 4, name = "Bucket", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 1),
+281: Item(alignment = 4, name = "Water Spear", char = "", weight = 2, life = 0, replacewith = -1, drops = [], walkable = None, damage = 2),
 }

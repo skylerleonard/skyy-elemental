@@ -91,7 +91,7 @@ class Game(object):
 		if ITEMS[item].life < 0 or ITEMS[item].life > self.player.damage()[ITEMS[item].alignment]:
 			return False
 		newitem = ITEMS[item].replacewith
-		self.player.inv += ITEMS[item].drops
+		self.player.inv = ITEMS[item].drops + self.player.inv
 		self.world[self.pos[:2]] = self.world[self.pos[:2]][:index] + bytes([newitem]) + self.world[self.pos[:2]][index+1:]
 		return True
 	def placeblock(self):
@@ -361,7 +361,7 @@ def main():
 			# Place a block
 			elif command in (10,32): game.placeblock() # Enter / Space
 			
-			alert = ITEMS[game.world[game.pos[:2]][WINDOWSIZE[1] * game.pos[2] + game.pos[3]]].name
+			alert = ITEMS[game.world[game.pos[:2]][WINDOWSIZE[1] * game.pos[2] + game.pos[3]]].name + (command == ord("c"))*(str(game.pos[:2]))
 	return 0
 
 
