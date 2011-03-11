@@ -295,6 +295,7 @@ def showcrafting(win, game):
 
 def main():
 	with open("items.txt") as itemfile:
+		noplace = {"char": "", "life": 0, "replacewith": -1, "drops": [], "walkable": None}
 		ITEMS.update(eval(itemfile.read())) # Load Items
 	with open("crafting.txt") as craftingfile:
 		CRAFTING.update(eval(craftingfile.read())) # Load Crafting options

@@ -5,7 +5,8 @@
 (4, 257, 257): 270, # 2 Sticks, 1 Pebble = Stone Axe
 (257, 257, 260): 271, # 2 Sticks, 1 Iron = Iron Axe
 (260, 260): 280, # 2 Iron = Bucket
-(6, ): 261, # 1 Water = Water Amulet
-(257, 257, 261): 281, # 2 Sticks, 1 Water Amulet = Water Spear
+(6, ): 264, # 1 Water = Water Amulet
+(257, 257, 264): 281, # 2 Sticks, 1 Water Amulet = Water Spear
 (4, 4, 4, 4): 5, # 4 Pebble = Stone
+(257, 260, 260): 290, # 1 Stick, 2 Iron = Short Sword
 }

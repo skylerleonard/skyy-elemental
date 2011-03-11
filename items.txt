@@ -1,3 +1,4 @@
+# alignments: 0 = none, 1 = earth, 2 = air, 3 = fire, 4 = water
 {
 0: Item(alignment = 0, name = "Spawn Point", char = "0", weight = 0, life = -1, replacewith = 0, drops = [], walkable = True, damage = 0),
 1: Item(alignment = 2, name = "Pit", char = " ", weight = 0, life = -1, replacewith = 1, drops = [], walkable = False, damage = 0),
@@ -12,14 +13,21 @@
 10: Item(alignment = 1, name = "Stone Tile", char = "+", weight = 10, life = 7, replacewith = 3, drops = [10], walkable = True, damage = 1),
 11: Item(alignment = 1, name = "Wood Tile", char = "x", weight = 9, life = 7, replacewith = 3, drops = [11], walkable = True, damage = 1),
 
-257: Item(alignment = 1, name = "Stick", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
+257: Item(alignment = 1, name = "Stick", weight = 3, damage = 0, **noplace),
 
-260: Item(alignment = 1, name = "Iron", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
-261: Item(alignment = 1, name = "Water Amulet", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 0),
+260: Item(alignment = 1, name = "Iron", weight = 3, damage = 0, **noplace),
+261: Item(alignment = 1, name = "Earth", weight = 3, damage = 0, **noplace),
+262: Item(alignment = 2, name = "Air Amulet", weight = 3, damage = 0, **noplace),
+263: Item(alignment = 3, name = "Fire Amulet", weight = 3, damage = 0, **noplace),
+264: Item(alignment = 4, name = "Water Amulet", weight = 3, damage = 0, **noplace),
 
-270: Item(alignment = 1, name = "Stone Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 3),
-271: Item(alignment = 1, name = "Iron Axe", char = "", weight = 4, life = 0, replacewith = -1, drops = [], walkable = None, damage = 5),
+270: Item(alignment = 1, name = "Stone Axe", weight = 4, damage = 3, **noplace),
+271: Item(alignment = 1, name = "Iron Axe", weight = 4, damage = 5, **noplace),
+272: Item(alignment = 1, name = "Earth Axe", weight = 4, damage = 7, **noplace),
 
-280: Item(alignment = 4, name = "Bucket", char = "", weight = 3, life = 0, replacewith = -1, drops = [], walkable = None, damage = 1),
-281: Item(alignment = 4, name = "Water Spear", char = "", weight = 2, life = 0, replacewith = -1, drops = [], walkable = None, damage = 2),
+280: Item(alignment = 4, name = "Bucket", weight = 3, damage = 1, **noplace),
+281: Item(alignment = 4, name = "Water Spear", weight = 2, damage = 2, **noplace),
+
+290: Item(alignment = 2, name = "Short Sword", weight = 4, damage = 1, **noplace),
+291: Item(alignment = 2, name = "Sword", weight = 4, damage = 3, **noplace),
 }
