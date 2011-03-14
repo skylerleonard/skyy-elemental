@@ -1,12 +1,26 @@
 {
+# Simple Crafting
 (9, ): 257, # 1 Wood = 1 Sticks
+(4, 4, 4, 4): 5, # 4 Pebble = Stone
+# Amulet Crafting
+(6, ): 264, # 1 Water = Water Amulet
+# Building materials
 (5, 5): 10, # 2 Stone = Stone Tile
 (9, 9): 11, # 2 Wood = Wood Tile
+# Earth tools
 (4, 257, 257): 270, # 2 Sticks, 1 Pebble = Stone Axe
 (257, 257, 260): 271, # 2 Sticks, 1 Iron = Iron Axe
+(257, 257, 261): 273, # 2 Sticks, 1 Earth Amulet = Earth Axe
+(4, 4, 4, 257, 257): 274, # 2 Sticks, 3 Pebbles = Stone Pickaxe
+(257, 257, 260, 260, 260): 272, # 2 Sticks, 3 Iron = Iron Pickaxe
+(257, 257, 261, 261, 261): 275, # 2 Sticks, 3 Earth = Earth Pickaxe
+# Water Tools
 (260, 260): 280, # 2 Iron = Bucket
-(6, ): 264, # 1 Water = Water Amulet
 (257, 257, 264): 281, # 2 Sticks, 1 Water Amulet = Water Spear
-(4, 4, 4, 4): 5, # 4 Pebble = Stone
+# Air Tools
 (257, 260, 260): 290, # 1 Stick, 2 Iron = Short Sword
+(257, 260, 260, 260): 291, # 1 Stick, 3 Iron = Sword
+(257, 262, 262): 292, # 1 Stick, 2 Air Amulets = Singing Sword
+# Fire tools
+(257, 257, 263): 300, # 2 Sticks, 1 Fire Amulet = Fire Spear
 }
